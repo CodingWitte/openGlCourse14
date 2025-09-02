@@ -1,122 +1,130 @@
 #include<iostream>
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
-// vertex shader source code
-const char* vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 aPos;\n"
-"void main()\n"
-"{\n"
-"	gl_Position =  vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-"}\0";
-// fragment shader source code
-const char* fragmentShaderSource = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"void main()\n"
-"{\n"
-"	FragColor = vec4(0.8f, 0.3f, 0.2f, 1.0f);\n"
-"}\n\0";
+#include<stb/stb_image.h>
+
+
+#include"shaderClass.h"
+#include"VAO.h"
+#include"VBO.h"
+#include"EBO.h"
+
+
+
+GLfloat vertices[] =
+{ //     COORDINATES     /        COLORS      /   TexCoord  //
+	-0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f, // Lower left corner
+	-0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,	0.0f, 1.0f, // Upper left corner
+	 0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,	1.0f, 1.0f, // Upper right corner
+	 0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f  // Lower right corner
+};
+GLuint indices[] = {
+	0, 2, 1,														// Uppper triangle
+	0, 3, 2															// Lower triangle
+};
+
 
 int main() {
 	glfwInit();														// initializing GLFW
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);					// version (before the dot)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);					// version (after the dot)
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);	// defining that only the core version is used so also only modern functions
-	
-	
-	GLfloat vertices[] = {											// vertices coordinates
-		-0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f,					// lower left corner
-		0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f,						// lower right corner
-		0.0f ,0.5f * float(sqrt(3)) * 2 / 3, 0.0f					// upper corner
-	};
 
+
+	
 	// creating window using GLFW
 	GLFWwindow* window = glfwCreateWindow(800, 800, "openGLCourse", NULL, NULL);
 	//width height name fullscreen ?
 	if (window == NULL) {											// error handling
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
+		return -1;
 	}
 	glfwMakeContextCurrent(window);									// makes the window part of the current context
-	
+
 	gladLoadGL();													// loading GLAD to configure OpenGL
-	glViewport(0,0,800,800);										// specify the viewport of OpenGL
+	glViewport(0, 0, 800, 800);										// specify the viewport of OpenGL
+	
 
 
-// Shaders //
-	
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);			// creating vertex shader object and getting its reference
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);		// attaching vertex shader source to vertex shader object
-	glCompileShader(vertexShader);									// compiling shader
-
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);		// creating fragment shader object and getting its reference
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);	// attaching vertex shader source to vertex shader object
-	glCompileShader(fragmentShader);								// compiling shader
-
-	GLuint shaderProgram = glCreateProgram();						// creating shader program object and get its refernce
-		
-	glAttachShader(shaderProgram, vertexShader);					// attaching vertex & fragment shader to the shader program 
-	glAttachShader(shaderProgram, fragmentShader);					// arg1: reference to the shaderProgram arg2: the shader itself
-	
-	glLinkProgram(shaderProgram);									// wrap up all shaders into the shader program arg: reference to the shader program
-
-	
-	glDeleteShader(vertexShader);									// deleting now no more used vertex shader object &
-	glDeleteShader(fragmentShader);									// fragment shader object
-// Shaders //
 
 
-	GLuint VAO, VBO;															// creating reference containers for: vertex array object, vertex buffer object
-	// specifying where to find the object / vertex array object => stores pointers to one or more vbos and defines how to interprate them
-	glGenVertexArrays(1, &VAO);													// generating the VAO & the VBO with 1 object each COUTION: VAO must be generated before VBO
-	glGenBuffers(1, &VBO);														// arg1: number of objs, arg2: refference to reference containers
-	
-	glBindVertexArray(VAO);														// binding the VAO => making it the current obj
-	
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);											// binding the VBO specifying it's a GL_ARRAY_BUFFER
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);	// introducing the vertices into the VBO
-	// from this point on the VBO is created									// stream = modifyed once used a few times, static = modifyed once used many times, dynamic = modifyed a few times used many times
-																				// draw = modyfied and used to draw and img on the screen, read, copy
-	//configuring the VAO
-	// 1. arg: inder of vertix atribute(way of comunicating with the vertex shader from the outside), 2. arg number of vertex arguments, 3. arg kind of values, 4. arg: only important if there are coordinates as intagers 5. argument stride of vertices => amount of data between each vertex 5. arg: offset pointer to vertices begin in array (in this case they are right at the start)
-	// configuring the vertex atribute so OpenGL knows how to read the VBO
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0); 
-	
-	
-	glEnableVertexAttribArray(0);												// enabeling vertexAttributeArray so OpenGL knows to use it(0 position of vertex attribute)
-	
-	
-	glBindBuffer(GL_ARRAY_BUFFER, 0);											// Bind the VBO & VAO to 0 so they cant be modifyed anymore
-	glBindVertexArray(0);
+	Shader shaderProgram("default.vert", "default.frag");			// Generates Shader object using shaders defualt.vert and default.frag
 
-		// concept: binding in open gl
-		// making a certin object the current object
-		// when a funciton is fiered to modify that type of obj it modifyes the current object / the binded object
-	
-	glClearColor(0.07f, 0.13f, 0.17f, 1.0f);		// specifying background color rgba like configuration 
-	
-	glClear(GL_COLOR_BUFFER_BIT);					// cleaning bag buffer & assigning new color to it
+	VAO VAO1;														// Generates Vertex Array Object
+	VAO1.Bind();													// Binds Vertex Array Object
 
+	VBO VBO1(vertices, sizeof(vertices));							// Generates Vertex Buffer Object and links it to vertices
+	EBO EBO1(indices, sizeof(indices));								// Generates Element Buffer Object and links it to indices
+
+	VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);						// Links VBO attributes such as coordinates 
+	VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));   //and colors to VAO 
+	VAO1.LinkAttrib(VBO1, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+
+	// Unbind all to prevent accidentally modifying them
+	VAO1.Unbind();
+	VBO1.Unbind();
+	EBO1.Unbind();
+
+
+
+
+	GLuint uniID = glGetUniformLocation(shaderProgram.ID, "scale");	// Gets ID of uniform called scale
+
+	// Texture
+	int widthImg, heightImg, numColCh;
+
+
+	unsigned char* bytes = stbi_load("pop_cat.png", &widthImg, &heightImg, &numColCh, 0);
+	GLuint texture;
+	glGenTextures(1, &texture);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	
-	glfwSwapBuffers(window);						// swapping buffers (back buffer with front buffer)
+	// for GL clampt to border
+	// float flatColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
+	// glTextParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, flatColor);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthImg, heightImg, 0, GL_RGBA, GL_UNSIGNED_BYTE, bytes); // texture (binded), leftover just put 0, type of color channels, width height, leftover just put 0, type of color channles the image has, data type of the pixels, image data
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+
+	stbi_image_free(bytes);
+	glBindTexture(GL_TEXTURE_2D, 0); // unbinding texture
+
+	GLuint tex0Uni = glGetUniformLocation(shaderProgram.ID, "tex0");
+	shaderProgram.Activate();
+	glUniform1i(tex0Uni, 0);
+
 
 	
 	while (!glfwWindowShouldClose(window)) {		// main while loop to keep the window displayed
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);	// specify the color of the background rgba like configuration 
 		glClear(GL_COLOR_BUFFER_BIT);				// cleaning the bag buffer and assigning the new color to it
-		glUseProgram(shaderProgram);				// specifying which shader program OpenGL shall use
-		glBindVertexArray(VAO);						// binding the VAO so OpenGL uses it
+		shaderProgram.Activate();					// specifying which shader program OpenGL shall use
+		glUniform1f(uniID, 0.5f);					// Assigns a value to the uniform; NOTE: Must always be done after activating the Shader Program
+		glBindTexture(GL_TEXTURE_2D, texture);
+		VAO1.Bind();								// binding the VAO so OpenGL uses it
 		// type of primitive, starting index of vertices, number of vertices
-		glDrawArrays(GL_TRIANGLES, 0, 3);			// drawing function
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);			// drawing function arg: 'shape', number of indecies, datatype of indecies, index of indecies
 
 		glfwSwapBuffers(window);					// swapping buffers (back buffer with front buffer
 		glfwPollEvents();							// taking care of all GLFW events
 	}
-	
-	
-	//deleting all created objs
-	glDeleteVertexArrays(1, &VAO);	
-	glDeleteBuffers(1, &VBO);		
-	glDeleteProgram(shaderProgram);	
+
+	// deleting all objects
+	VAO1.Delete();
+	VBO1.Delete();
+	EBO1.Delete();
+	shaderProgram.Delete();
+	glDeleteTextures(1, &texture);
+
 
 
 	glfwDestroyWindow(window);						// deleting window before ending the programm
