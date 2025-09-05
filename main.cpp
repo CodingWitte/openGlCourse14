@@ -95,7 +95,7 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);				// Cleaning the bag buffer and depth buffer
 		shaderProgram.Activate();					// Specifying which shader program OpenGL shall use
 		camera.Inputs(window);						// Handles camera inputs
-		camera.Matrix(45.0f, 0.1f, 100.0f, shaderProgram, "camMatrix");
+		camera.Matrix(45.0f, 0.1f, 100.0f, shaderProgram, "camMatrix"); // Updates and exports the camera matrix to the Vertex Shader
 		popCat.Bind();								// Binds texture so that it appears in the render
 		VAO1.Bind();								// binding the VAO so OpenGL uses it
 		// type of primitive, starting index of vertices, number of vertices
@@ -112,7 +112,7 @@ int main() {
 	popCat.Delete();
 	shaderProgram.Delete();
 
-
+	
 
 	glfwDestroyWindow(window);						// deleting window before ending the programm
 	glfwTerminate();								// terminating GLFW before ending the programm

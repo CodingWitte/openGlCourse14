@@ -19,7 +19,7 @@ void Camera::Inputs(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
 		Position += speed * Orientation;
 	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {// movement might be fixed with removing the cross up thing
 		Position += speed * -glm::normalize(glm::cross(Orientation, Up));
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
