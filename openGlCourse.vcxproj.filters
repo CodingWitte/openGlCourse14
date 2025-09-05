@@ -42,6 +42,15 @@
     <ClCompile Include="stb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="default.frag">
@@ -64,12 +73,18 @@
     <ClInclude Include="VAO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\Downloads\texture16x16.png">
       <Filter>Resource Files\Texture</Filter>
     </Image>
     <Image Include="..\..\..\Downloads\pop_cat.png">
+      <Filter>Resource Files\Texture</Filter>
+    </Image>
+    <Image Include="..\..\..\Downloads\brick.png">
       <Filter>Resource Files\Texture</Filter>
     </Image>
   </ItemGroup>

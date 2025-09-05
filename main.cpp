@@ -4,23 +4,37 @@
 #include<stb/stb_image.h>
 
 
+
+#include<glm/gtc/matrix_transform.hpp>
+#include<glm/gtc/type_ptr.hpp>
+#include<glm/glm.hpp>
+#include"Texture.h"
 #include"shaderClass.h"
 #include"VAO.h"
 #include"VBO.h"
 #include"EBO.h"
+#include"Camera.h"
+
+const unsigned int width = 800;
+const unsigned int height = 800;
 
 
 
 GLfloat vertices[] =
 { //     COORDINATES     /        COLORS      /   TexCoord  //
-	-0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f, // Lower left corner
-	-0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,	0.0f, 1.0f, // Upper left corner
-	 0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,	1.0f, 1.0f, // Upper right corner
-	 0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f  // Lower right corner
+	-0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,		0.0f, 0.0f, // Lower left corner
+	-0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,		5.0f, 0.0f, // Upper left corner
+	 0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,		0.0f, 0.0f, // Upper right corner
+	 0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,		5.0f, 0.0f,  // Lower right corner
+	 0.0f, 0.8f,  0.0f,	    0.92f, 0.86f, 0.76f,		2.5f, 5.0f
 };
 GLuint indices[] = {
 	0, 2, 1,														// Uppper triangle
-	0, 3, 2															// Lower triangle
+	0, 3, 2,														// Lower triangle
+	0, 1, 4,
+	1, 2, 4,
+	2, 3, 4,
+	3, 0, 4
 };
 
 
@@ -33,7 +47,7 @@ int main() {
 
 	
 	// creating window using GLFW
-	GLFWwindow* window = glfwCreateWindow(800, 800, "openGLCourse", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(width, height, "openGLCourse", NULL, NULL);
 	//width height name fullscreen ?
 	if (window == NULL) {											// error handling
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -43,7 +57,7 @@ int main() {
 	glfwMakeContextCurrent(window);									// makes the window part of the current context
 
 	gladLoadGL();													// loading GLAD to configure OpenGL
-	glViewport(0, 0, 800, 800);										// specify the viewport of OpenGL
+	glViewport(0, 0, width, height);	     						// specify the viewport of OpenGL
 	
 
 
@@ -58,8 +72,8 @@ int main() {
 	EBO EBO1(indices, sizeof(indices));								// Generates Element Buffer Object and links it to indices
 
 	VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);						// Links VBO attributes such as coordinates 
-	VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));   //and colors to VAO 
-	VAO1.LinkAttrib(VBO1, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));   // And colors to VAO 
+	VAO1.LinkAttrib(VBO1, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));	// And image to VAO
 
 	// Unbind all to prevent accidentally modifying them
 	VAO1.Unbind();
@@ -67,52 +81,25 @@ int main() {
 	EBO1.Unbind();
 
 
+	Texture popCat("brick.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
 
+	// Enables the Depth Buffer
+	glEnable(GL_DEPTH_TEST);
 
-	GLuint uniID = glGetUniformLocation(shaderProgram.ID, "scale");	// Gets ID of uniform called scale
+	// Creates camera object
+	Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
 
-	// Texture
-	int widthImg, heightImg, numColCh;
+	while (!glfwWindowShouldClose(window)) {		// Main while loop to keep the window displayed
 
-
-	unsigned char* bytes = stbi_load("pop_cat.png", &widthImg, &heightImg, &numColCh, 0);
-	GLuint texture;
-	glGenTextures(1, &texture);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	
-	// for GL clampt to border
-	// float flatColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
-	// glTextParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, flatColor);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthImg, heightImg, 0, GL_RGBA, GL_UNSIGNED_BYTE, bytes); // texture (binded), leftover just put 0, type of color channels, width height, leftover just put 0, type of color channles the image has, data type of the pixels, image data
-	glGenerateMipmap(GL_TEXTURE_2D);
-
-
-	stbi_image_free(bytes);
-	glBindTexture(GL_TEXTURE_2D, 0); // unbinding texture
-
-	GLuint tex0Uni = glGetUniformLocation(shaderProgram.ID, "tex0");
-	shaderProgram.Activate();
-	glUniform1i(tex0Uni, 0);
-
-
-	
-	while (!glfwWindowShouldClose(window)) {		// main while loop to keep the window displayed
-		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);	// specify the color of the background rgba like configuration 
-		glClear(GL_COLOR_BUFFER_BIT);				// cleaning the bag buffer and assigning the new color to it
-		shaderProgram.Activate();					// specifying which shader program OpenGL shall use
-		glUniform1f(uniID, 0.5f);					// Assigns a value to the uniform; NOTE: Must always be done after activating the Shader Program
-		glBindTexture(GL_TEXTURE_2D, texture);
+		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);	// Specify the color of the background rgba like configuration 
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);				// Cleaning the bag buffer and depth buffer
+		shaderProgram.Activate();					// Specifying which shader program OpenGL shall use
+		camera.Inputs(window);						// Handles camera inputs
+		camera.Matrix(45.0f, 0.1f, 100.0f, shaderProgram, "camMatrix");
+		popCat.Bind();								// Binds texture so that it appears in the render
 		VAO1.Bind();								// binding the VAO so OpenGL uses it
 		// type of primitive, starting index of vertices, number of vertices
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);			// drawing function arg: 'shape', number of indecies, datatype of indecies, index of indecies
+		glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(int), GL_UNSIGNED_INT, 0);			// drawing function arg: 'shape', number of indecies, datatype of indecies, index of indecies
 
 		glfwSwapBuffers(window);					// swapping buffers (back buffer with front buffer
 		glfwPollEvents();							// taking care of all GLFW events
@@ -122,8 +109,8 @@ int main() {
 	VAO1.Delete();
 	VBO1.Delete();
 	EBO1.Delete();
+	popCat.Delete();
 	shaderProgram.Delete();
-	glDeleteTextures(1, &texture);
 
 
 
