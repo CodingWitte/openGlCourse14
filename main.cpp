@@ -36,6 +36,31 @@ GLuint indices[] = {
 	2, 3, 4,
 	3, 0, 4
 };
+GLfloat lightVertices[] = {
+	//	  COORDINATES    //
+	-0.1f, -0.1f, -0.1f,
+	-0.1f, -0.1f, -0.1f,
+	 0.1f, -0.1f, -0.1f,
+	 0.1f, -0.1f,  0.1f,
+	-0.1f,  0.1f,  0.1f,
+	-0.1f,  0.1f, -0.1f,
+	 0.1f,  0.1f, -0.1f,
+	 0.1f,  0.1f,  0.1f
+};
+GLuint lightIndices[] = {
+	0, 1, 2,
+	0, 2, 3,
+	0, 4, 7,
+	0, 7, 3,
+	3, 7, 6,
+	3, 6, 2,
+	2, 6, 5,
+	2, 5, 1,
+	1, 5, 4,
+	1, 4, 0,
+	4, 5, 6,
+	4, 6, 7
+};
 
 
 int main() {
@@ -62,7 +87,7 @@ int main() {
 
 
 
-
+//shader1
 	Shader shaderProgram("default.vert", "default.frag");			// Generates Shader object using shaders defualt.vert and default.frag
 
 	VAO VAO1;														// Generates Vertex Array Object
@@ -79,6 +104,20 @@ int main() {
 	VAO1.Unbind();
 	VBO1.Unbind();
 	EBO1.Unbind();
+// shader1
+
+
+// shader2
+	Shader lightShader("light.vert", "light.frag");
+
+	VAO lightVAO;
+	lightVAO.Bind();
+
+	VBO lightVBO(lightVertices, sizeof(lightVertices));
+	EBO lightEBO(lightIndices, sizeof(lightIndices) * sizeof(int));
+
+
+
 
 
 	Texture popCat("brick.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
@@ -95,7 +134,8 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);				// Cleaning the bag buffer and depth buffer
 		shaderProgram.Activate();					// Specifying which shader program OpenGL shall use
 		camera.Inputs(window);						// Handles camera inputs
-		camera.Matrix(45.0f, 0.1f, 100.0f, shaderProgram, "camMatrix"); // Updates and exports the camera matrix to the Vertex Shader
+		camera.updateMatrix(45.0f, 0.1f, 100.0f); // Updates and exports the camera matrix to the Vertex Shader
+		camera.Matrix(shaderProgram, "camMatrix");
 		popCat.Bind();								// Binds texture so that it appears in the render
 		VAO1.Bind();								// binding the VAO so OpenGL uses it
 		// type of primitive, starting index of vertices, number of vertices
