@@ -133,35 +133,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="block.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Camera.h" />
     <ClCompile Include="EBO.cpp" />
-    <ClCompile Include="EBOs.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="shaderClass.cpp" />
     <ClCompile Include="stb.cpp" />
     <ClCompile Include="texture.cpp" />
-    <ClCompile Include="Textures.cpp" />
     <ClCompile Include="VAO.cpp" />
-    <ClCompile Include="VAOs.cpp" />
-    <ClCompile Include="VAOs.h" />
     <ClCompile Include="VBO.cpp" />
-    <ClCompile Include="VBOs.cpp" />
-    <ClCompile Include="VBOs.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="default.frag" />
     <None Include="default.vert" />
+    <None Include="light.frag" />
+    <None Include="light.vert" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Block.h" />
     <ClInclude Include="EBO.h" />
-    <ClInclude Include="EBOs.h" />
     <ClInclude Include="shaderClass.h" />
     <ClInclude Include="Texture.h" />
-    <ClInclude Include="Textures.h" />
     <ClInclude Include="VAO.h" />
     <ClInclude Include="VBO.h" />
   </ItemGroup>
@@ -169,7 +161,6 @@
     <Image Include="..\..\..\Downloads\brick.png" />
     <Image Include="..\..\..\Downloads\pop_cat.png" />
     <Image Include="..\..\..\Downloads\texture16x16.png" />
-    <Image Include="..\..\..\Pictures\pinkOre.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

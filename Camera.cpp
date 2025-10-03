@@ -6,34 +6,39 @@ Camera::Camera(int width, int height, glm::vec3 position) {
 	Position = position;
 };
 
-void Camera::Matrix(float FOVdeg, float nearPlane, float farPlane, Shader& shader, const char* uniform) {
+void Camera::updateMatrix(float FOVdeg, float nearPlane, float farPlane) {
+	// Initializes matrices since otherwise they will be the null matrix
 	glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 projection = glm::mat4(1.0f);
+
+	// Makes camera look in the right direction from the right position
 	view = glm::lookAt(Position, Position + Orientation, Up);
+	// Adds prespective to the scene
 	projection = glm::perspective(glm::radians(FOVdeg), (float)(width / height), nearPlane, farPlane);
 
-	glUniformMatrix4fv(glGetUniformLocation(shader.ID, uniform), 1, GL_FALSE, glm::value_ptr(projection * view));
+	// Sets new camera matrix
+	cameraMatrix = projection * view;
+}
+void Camera::Matrix(Shader& shader, const char* uniform) {
+	//
+	glUniformMatrix4fv(glGetUniformLocation(shader.ID, uniform), 1, GL_FALSE, glm::value_ptr(cameraMatrix));
 }
 
-void Camera::Inputs(GLFWwindow* window) {
-	// Create a flattened direction vector (ignore vertical component)
-	glm::vec3 flatOrientation = glm::normalize(glm::vec3(Orientation.x, 0.0f, Orientation.z));
 
+
+void Camera::Inputs(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		Position += speed * flatOrientation;
+		Position += speed * Orientation;
+	}
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {// movement might be fixed with removing the cross up thing
+		Position += speed * -glm::normalize(glm::cross(Orientation, Up));
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		Position -= speed * flatOrientation;
-	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-		// Move left: cross product of flatOrientation and up vector
-		Position -= speed * glm::normalize(glm::cross(flatOrientation, Up));
+		Position += speed * -Orientation;
 	}
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-		// Move right
-		Position += speed * glm::normalize(glm::cross(flatOrientation, Up));
+		Position += speed * glm::normalize(glm::cross(Orientation, Up));
 	}
-
 	
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
 		Position += speed * Up;
@@ -64,8 +69,8 @@ void Camera::Inputs(GLFWwindow* window) {
 		double mouseY;
 		glfwGetCursorPos(window, &mouseX, &mouseY);
 
-		float rotX = sensitivity * (float)(mouseY - (height / 2.0f)) / height;
-		float rotY = sensitivity * (float)(mouseX - (height / 2.0f)) / height;
+		float rotX = sensitivity * (float)(mouseY - (height / 2)) / height;
+		float rotY = sensitivity * (float)(mouseX - (height / 2)) / height;
 
 		glm::vec3 newOrientation = glm::rotate(Orientation, glm::radians(-rotX), glm::normalize(glm::cross(Orientation, Up)));
 
@@ -74,7 +79,7 @@ void Camera::Inputs(GLFWwindow* window) {
 		}
 		Orientation = glm::rotate(Orientation, glm::radians(-rotY), Up);
 
-		glfwSetCursorPos(window, (width / 2.0f), (height / 2.0f));
+		glfwSetCursorPos(window, (width / 2), (height / 2));
 	} else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE) {
 		firstClick = true;
 	}

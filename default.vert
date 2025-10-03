@@ -16,6 +16,7 @@ out vec2 texCoord;
 // Imports the camera matrix from the main function
 uniform mat4 camMatrix;
 
+
 void main()
 {
 	// Outputs the positions/coordinates of all vertices
