@@ -1,10 +1,11 @@
 #include"VBO.h"
 
-// Constructor that generates a Vertex Buffer Object and links it to indices
-VBO::VBO(GLfloat* vertices, GLsizeiptr size) {
+// Constructor that generates a Vertex Buffer Object and links it to vertices
+VBO::VBO(std::vector<Vertex>& vertices)
+{
 	glGenBuffers(1, &ID);
-	glBindBuffer(GL_ARRAY_BUFFER, ID);								// binding the VBO specifying it's a GL_ARRAY_BUFFER
-	glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);	// introducing the vertices into the VBO
+	glBindBuffer(GL_ARRAY_BUFFER, ID);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 }
 // Binds the VBO
 void VBO::Bind() {
