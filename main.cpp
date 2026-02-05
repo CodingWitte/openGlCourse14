@@ -57,14 +57,32 @@ int main() {
 
 	// Enables the Depth Buffer
 	glEnable(GL_DEPTH_TEST);
-
+	{
+		// GL_NEVER
+		//		Never passes.
+		// GL_LESS
+		//		Passes if the incoming depth value is less than the stored depth value.
+		// GL_EQUAL
+		//		Passes if the incomming depth value is equal to the stored depth value.
+		// GL_LEQUAL
+		//		Passes if the incomming depth value is less than or equal to the stored depth value.
+		// GL_Greater
+		//		Passes if the incoming depth value is greater than the stored depth value.
+		// GL_NOTEQUAL
+		//		Passes if the incoming depth value is not equal to the stored depth value.
+		// GL_GEQUAL
+		//		Passes if the incoming depth value is greater than or equal to the stored depth value
+		// GL_ALWAYS
+		//		Always passes.
+	}
 	// Creates camera object
 	Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
-	Model model("models/bunny/scene.gltf");
+	Model ground("models/landScape/scene.gltf");
+	Model trees("models/trees/scene.gltf");
 
 	while (!glfwWindowShouldClose(window)) {		// Main while loop to keep the window displayed
 
-		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+		glClearColor(0.85f, 0.85f, 0.90f, 1.0f);
 		// Clean the back buffer and depth buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -74,8 +92,8 @@ int main() {
 		camera.updateMatrix(45.0f, 0.1f, 100.0f);
 
 		// Draw a model
-		model.Draw(shaderProgram, camera);
-
+		ground.Draw(shaderProgram, camera);
+		trees.Draw(shaderProgram, camera);
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
 		// Take care of all GLFW events
